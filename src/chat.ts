@@ -29,6 +29,6 @@ export class Chat {
     });
 
     console.timeEnd('code-review cost');
-    return res.text.includes('Not OK') ? '' : res.text;
+    return res.text.includes('Not OK') ? res.text : '';
   };
 }

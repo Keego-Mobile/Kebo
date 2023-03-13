@@ -9,7 +9,7 @@ export class Chat {
   }
 
   private generatePrompt = (patch: string) => {
-    return `review this code, only answer short text limited 1 line. if it's good, answers "OK", if any bug risk and improvement suggestion are welcome
+    return `review this code, only answer short text limited 1 line. if it's good, answers "OK" else start with "💢 NOT OK - {text}", if any bug risk lint and improvement suggestion are welcome
     ${patch}
     `;
   };
@@ -29,6 +29,6 @@ export class Chat {
     });
 
     console.timeEnd('code-review cost');
-    return res.text.includes('Not OK') ? res.text : '';
+    return res.text.includes('NOT OK') ? res.text : '';
   };
 }

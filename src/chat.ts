@@ -9,7 +9,7 @@ export class Chat {
   }
 
   private generatePrompt = (patch: string) => {
-    return `Bellow is the code patch, please help me do a brief code review, if any bug risk and improvement suggestion are welcome
+    return `review this code, only answer short text limited 1 line. if it's good, answers "OK", if any bug risk and improvement suggestion are welcome
     ${patch}
     `;
   };
@@ -29,6 +29,6 @@ export class Chat {
     });
 
     console.timeEnd('code-review cost');
-    return res.text;
+    return res.text.includes('Not OK') ? '' : res.text;
   };
 }

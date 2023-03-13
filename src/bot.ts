@@ -1,11 +1,30 @@
 import { Context, Probot } from 'probot';
 import { Chat } from './chat.js';
+import { ChatGPTAuthTokenService } from "chat-gpt-authenticator";
 
 const OPENAI_API_KEY = 'OPENAI_API_KEY';
 const MAX_PATCH_COUNT = 4000;
 
 export const robot = (app: Probot) => {
   const loadChat = async (context: Context) => {
+    if (process.env.OPENAI_USERNAME && process.env.OPENAI_PASSWORD) {
+      const chatGptAuthTokenService = new ChatGPTAuthTokenService(
+        process.env.OPENAI_USERNAME,
+        process.env.OPENAI_PASSWORD
+      );
+
+      const accesstoken = await chatGptAuthTokenService.getToken();
+      const defaultChat = new Chat(accesstoken, true);
+      try {
+        await defaultChat.testModel()
+        console.log("Using Web version")
+        return defaultChat
+      } catch {
+        console.log("Using OpenAI version")
+      }
+    }
+
+
     if (process.env.OPENAI_API_KEY) {
       return new Chat(process.env.OPENAI_API_KEY);
     }
@@ -13,6 +32,12 @@ export const robot = (app: Probot) => {
     const repo = context.repo();
 
     try {
+      try {
+
+      } catch {
+
+      }
+
       const { data } = (await context.octokit.request(
         'GET /repos/{owner}/{repo}/actions/variables/{name}',
         {

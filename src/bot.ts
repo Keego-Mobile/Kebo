@@ -64,12 +64,13 @@ export const robot = (app: Probot) => {
   };
 
   app.on(
-    ['pull_request.opened', 'pull_request.synchronize'],
+    ['pull_request.opened', 'pull_request.synchronize', 'pull_request.reopened'],
     async (context) => {
       const repo = context.repo();
       const chat = await loadChat(context);
 
       if (!chat) {
+        console.log("- No Chat Client Found!")
         return 'no chat';
       }
 
@@ -92,6 +93,8 @@ export const robot = (app: Probot) => {
 
       let { files: changedFiles, commits } = data.data;
 
+      console.log("- changedFiles from base: ", changedFiles)
+
       if (context.payload.action === 'synchronize') {
         if (commits.length >= 2) {
           const {
@@ -103,14 +106,18 @@ export const robot = (app: Probot) => {
             head: commits[commits.length - 1].sha,
           });
 
-          const filesNames = files?.map((file) => file.filename) || [];
-          changedFiles = changedFiles?.filter((file) =>
-            filesNames.includes(file.filename)
-          );
+          changedFiles = files
+
+          console.log("- changedFiles from last commits: ", changedFiles)
+          // const filesNames = files?.map((file) => file.filename) || [];
+          // changedFiles = changedFiles?.filter((file) =>
+          //   filesNames.includes(file.filename)
+          // );
         }
       }
 
       if (!changedFiles?.length) {
+        console.log("- No change");
         return 'no change';
       }
 

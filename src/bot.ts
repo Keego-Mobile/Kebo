@@ -135,7 +135,28 @@ export const robot = (app: Probot) => {
           continue;
         }
 
+        try {
+          const fileContent = await context.octokit.repos.getContent({
+            owner: repo.owner,
+            repo: repo.repo,
+            path: file.filename,
+            ref: context.payload.pull_request.head.sha,
+          });
+
+
+          if ('content' in fileContent.data && 'type' in fileContent.data && fileContent.data.type === 'file') {
+            const decodedContent = Buffer.from(fileContent.data.content, 'base64').toString();
+            console.log(`Content of ${file.filename}: ${decodedContent}`);
+          } else {
+            console.log(`${file.filename} is not a file`);
+          }
+        } catch {
+          console.log(`${file.filename} get failed`);
+
+        }
+
         const res = await chat?.codeReview(patch);
+        finalReview += `🗒️[${file.filename}](${file.raw_url})\n${res}\n---\n`;
 
         if (!!res && res.includes('NOT OK')) {
           await context.octokit.pulls.createReviewComment({
@@ -147,22 +168,18 @@ export const robot = (app: Probot) => {
             body: res,
             position: patch.split('\n').length - 1,
           });
-        } else {
-          finalReview += `🗒️${file.filename}\n${res}\n---\n`;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 1100));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
-
 
       await context.octokit.issues.createComment({
         repo: repo.repo,
         owner: repo.owner,
         issue_number: context.pullRequest().pull_number,
-        body: await chat?.codeReview(`summary & concise all the reviews aboves, answer start with "✅ OK" if it seems good else "💢 NOT OK": 
-        ${finalReview.length > MAX_PATCH_COUNT ? finalReview.substring(0, MAX_PATCH_COUNT) : finalReview}
-        `, false)
+        body: finalReview
       });
+
 
       console.timeEnd('gpt cost');
       console.info('suceess reviewed', context.payload.pull_request.html_url);

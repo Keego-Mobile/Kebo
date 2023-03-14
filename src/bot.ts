@@ -120,6 +120,8 @@ export const robot = (app: Probot) => {
 
       console.time('gpt cost');
 
+      var finalReview = ''
+
       for (let i = 0; i < changedFiles.length; i++) {
         const file = changedFiles[i];
         const patch = file.patch || '';
@@ -135,7 +137,7 @@ export const robot = (app: Probot) => {
 
         const res = await chat?.codeReview(patch);
 
-        if (!!res) {
+        if (!!res && res.includes('NOT OK')) {
           await context.octokit.pulls.createReviewComment({
             repo: repo.repo,
             owner: repo.owner,
@@ -145,11 +147,22 @@ export const robot = (app: Probot) => {
             body: res,
             position: patch.split('\n').length - 1,
           });
+        } else {
+          finalReview += `🗒️${file.filename}\n${res}\n---\n`;
         }
       }
 
+
+      await context.octokit.issues.createComment({
+        repo: repo.repo,
+        owner: repo.owner,
+        issue_number: context.pullRequest().pull_number,
+        body: await chat?.codeReview(`summary & concise all the reviews aboves, answer start with "✅ OK" if it seems good else "💢 NOT OK"`, false)
+      });
+
       console.timeEnd('gpt cost');
       console.info('suceess reviewed', context.payload.pull_request.html_url);
+      console.log(finalReview)
 
       return 'success';
     }

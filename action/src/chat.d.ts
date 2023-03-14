@@ -5,5 +5,5 @@ export declare class Chat {
     constructor(apikey: string, unofficial?: boolean);
     private generatePrompt;
     testModel: () => Promise<void>;
-    codeReview: (patch: string) => Promise<string>;
+    codeReview: (patch: string, usingPrompt?: boolean) => Promise<string>;
 }

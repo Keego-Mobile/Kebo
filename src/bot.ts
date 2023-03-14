@@ -150,6 +150,8 @@ export const robot = (app: Probot) => {
         } else {
           finalReview += `🗒️${file.filename}\n${res}\n---\n`;
         }
+
+        await new Promise(resolve => setTimeout(resolve, 1100));
       }
 
 

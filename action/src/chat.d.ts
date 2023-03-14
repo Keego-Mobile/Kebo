@@ -1,8 +1,9 @@
-import { ChatGPTAPI, ChatGPTUnofficialProxyAPI } from 'chatgpt';
+import { ChatGPTAPI, ChatGPTUnofficialProxyAPI, ChatMessage } from 'chatgpt';
 export declare class Chat {
     chatAPI: ChatGPTAPI | ChatGPTUnofficialProxyAPI;
+    lastChatMessage?: ChatMessage;
     constructor(apikey: string, unofficial?: boolean);
     private generatePrompt;
-    testModel: () => Promise<import("chatgpt").ChatMessage>;
+    testModel: () => Promise<void>;
     codeReview: (patch: string) => Promise<string>;
 }

@@ -1,6 +1,7 @@
 import { Context, Probot } from 'probot';
 import { Chat } from './chat.js';
 import { ChatGPTAuthTokenService } from "chat-gpt-authenticator";
+import * as path from 'path';
 
 const OPENAI_API_KEY = 'OPENAI_API_KEY';
 const MAX_PATCH_COUNT = 4000;
@@ -93,8 +94,6 @@ export const robot = (app: Probot) => {
 
       let { files: changedFiles, commits } = data.data;
 
-      console.log("- changedFiles from base: ", changedFiles)
-
       if (context.payload.action === 'synchronize') {
         if (commits.length >= 2) {
           const {
@@ -107,8 +106,6 @@ export const robot = (app: Probot) => {
           });
 
           changedFiles = files
-
-          console.log("- changedFiles from last commits: ", changedFiles)
           // const filesNames = files?.map((file) => file.filename) || [];
           // changedFiles = changedFiles?.filter((file) =>
           //   filesNames.includes(file.filename)
@@ -126,10 +123,16 @@ export const robot = (app: Probot) => {
       for (let i = 0; i < changedFiles.length; i++) {
         const file = changedFiles[i];
         const patch = file.patch || '';
+        const fileExtension = path.extname(file.filename);
+
+        if (!/\.(java|kt|xml|gradle|properties)$/.test(fileExtension)) {
+          continue;
+        }
 
         if (!patch || patch.length > MAX_PATCH_COUNT) {
           continue;
         }
+
         const res = await chat?.codeReview(patch);
 
         if (!!res) {

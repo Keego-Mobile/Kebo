@@ -1,7 +1,8 @@
-import { ChatGPTAPI, ChatGPTUnofficialProxyAPI } from 'chatgpt';
+import { ChatGPTAPI, ChatGPTUnofficialProxyAPI, ChatMessage } from 'chatgpt';
 
 export class Chat {
   public chatAPI: ChatGPTAPI | ChatGPTUnofficialProxyAPI;
+  public lastChatMessage?: ChatMessage;
 
   constructor(apikey: string, unofficial: boolean = true) {
     this.chatAPI = unofficial ?
@@ -13,13 +14,13 @@ export class Chat {
   }
 
   private generatePrompt = (patch: string) => {
-    return `review this code, only answer short text limited 1 line. if it's good, answers "OK" else start with "💢 NOT OK - {text}", if any bug risk lint and improvement suggestion are welcome
+    return ` i want you act as android developer, review this code, only care about java, kotlin or android related files, only answer short text limited 1 line. if it's good, answer "OK" else answer start with "💢 NOT OK - {text}", if any bug, risk, lint, not clean code then improvement suggestion are welcome
     ${patch}
     `;
   };
 
   public testModel = async () => {
-    return await this.chatAPI.sendMessage("hello, i need your help");
+    this.lastChatMessage = this.lastChatMessage ?? await this.chatAPI.sendMessage(this.generatePrompt(''));
   }
 
   public codeReview = async (patch: string) => {
@@ -30,10 +31,12 @@ export class Chat {
     console.time('code-review cost');
     const prompt = this.generatePrompt(patch);
 
-    const res = await this.chatAPI.sendMessage(prompt);
+    this.lastChatMessage = await this.chatAPI.sendMessage(prompt, {
+      parentMessageId: this.lastChatMessage?.id
+    });
 
     console.timeEnd('code-review cost');
-    console.log("Answers: ", res.text);
-    return res.text.includes('NOT OK') ? res.text : '';
+    console.log("Answers: ", this.lastChatMessage.text);
+    return this.lastChatMessage.text.includes('NOT OK') ? this.lastChatMessage.text : '';
   };
 }

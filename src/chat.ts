@@ -34,6 +34,7 @@ export class Chat {
       prompt = this.generatePrompt(patch);
     }
 
+    console.log(`parentMessageId: ${this.lastChatMessage?.id} & conversationId: ${this.lastChatMessage?.conversationId}`)
     this.lastChatMessage = await this.chatAPI.sendMessage(prompt, {
       parentMessageId: this.lastChatMessage?.id,
       conversationId: this.lastChatMessage?.conversationId

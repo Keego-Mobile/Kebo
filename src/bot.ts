@@ -4,7 +4,7 @@ import { ChatGPTAuthTokenService } from "chat-gpt-authenticator";
 import * as path from 'path';
 
 const OPENAI_API_KEY = 'OPENAI_API_KEY';
-const MAX_PATCH_COUNT = 4000;
+const MAX_PATCH_COUNT = 3900;
 
 export const robot = (app: Probot) => {
   const loadChat = async (context: Context) => {
@@ -157,7 +157,9 @@ export const robot = (app: Probot) => {
         repo: repo.repo,
         owner: repo.owner,
         issue_number: context.pullRequest().pull_number,
-        body: await chat?.codeReview(`summary & concise all the reviews aboves, answer start with "✅ OK" if it seems good else "💢 NOT OK"`, false)
+        body: await chat?.codeReview(`summary & concise all the reviews aboves, answer start with "✅ OK" if it seems good else "💢 NOT OK": 
+        ${finalReview.length > MAX_PATCH_COUNT ? finalReview.substring(0, MAX_PATCH_COUNT) : finalReview}
+        `, false)
       });
 
       console.timeEnd('gpt cost');

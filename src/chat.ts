@@ -14,7 +14,7 @@ export class Chat {
   }
 
   private generatePrompt = (patch: string) => {
-    return `i want you act as android developer, review this code, only answer short text limited 1 line. if it's good, answer "✅OK" else answer start with "💢 NOT OK - {text}". if any bug, risk, lint, clean code and improvement suggestion are welcome
+    return `i want you act as android developer, review these codes, only answer short text limited from 1 to 2 lines. if it's good, answer "✅OK" else answer start with "💢 NOT OK - {text}". report any bug, risk. coding must follow lint and clean code principle. improvement suggestion are welcome
     ${patch}
     `;
   };

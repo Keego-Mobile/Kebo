@@ -135,25 +135,25 @@ export const robot = (app: Probot) => {
           continue;
         }
 
-        try {
-          const fileContent = await context.octokit.repos.getContent({
-            owner: repo.owner,
-            repo: repo.repo,
-            path: file.filename,
-            ref: context.payload.pull_request.head.sha,
-          });
+        // try {
+        //   const fileContent = await context.octokit.repos.getContent({
+        //     owner: repo.owner,
+        //     repo: repo.repo,
+        //     path: file.filename,
+        //     ref: context.payload.pull_request.head.sha,
+        //   });
 
 
-          if ('content' in fileContent.data && 'type' in fileContent.data && fileContent.data.type === 'file') {
-            const decodedContent = Buffer.from(fileContent.data.content, 'base64').toString();
-            console.log(`Content of ${file.filename}: ${decodedContent}`);
-          } else {
-            console.log(`${file.filename} is not a file`);
-          }
-        } catch {
-          console.log(`${file.filename} get failed`);
+        //   if ('content' in fileContent.data && 'type' in fileContent.data && fileContent.data.type === 'file') {
+        //     const decodedContent = Buffer.from(fileContent.data.content, 'base64').toString();
+        //     console.log(`Content of ${file.filename}: ${decodedContent}`);
+        //   } else {
+        //     console.log(`${file.filename} is not a file`);
+        //   }
+        // } catch {
+        //   console.log(`${file.filename} get failed`);
 
-        }
+        // }
 
         const res = await chat?.codeReview(patch);
         finalReview += `🗒️[${file.filename}](${file.raw_url})\n${res}\n---\n`;
